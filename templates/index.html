@@ -1,0 +1,1504 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dengue Prediction System | Dengue Outbreak Prediction on the basis of Environmental and Demographic factors</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+            --success-color: #27ae60;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--dark-color);
+            min-height: 100vh;
+            background-attachment: fixed;
+            overflow-x: hidden;
+        }
+
+        .container {
+            margin-top: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transform-style: preserve-3d;
+            perspective: 1000px;
+            transition: all 0.5s ease;
+        }
+
+        .container:hover {
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+
+        #map {
+            height: 550px;
+            width: 100%;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+            border: 2px solid white;
+            transform: translateZ(20px);
+            transition: all 0.3s ease;
+        }
+
+        #map:hover {
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.25);
+        }
+
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.9);
+            transition: all 0.4s ease;
+            border: none;
+            transform-style: preserve-3d;
+            overflow: hidden;
+            position: relative;
+            min-height: 300px;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, var(--secondary-color), var(--accent-color));
+        }
+
+        .card:hover {
+            transform: translateY(-10px) scale(1.02) rotateY(5deg);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            font-weight: 800;
+            color: var(--primary-color);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            position: relative;
+            display: inline-block;
+            padding-bottom: 10px;
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--secondary-color), var(--accent-color));
+            border-radius: 2px;
+        }
+
+        .list-group-item {
+            background: rgba(255, 255, 255, 0.8);
+            border: none;
+            font-weight: 600;
+            color: var(--dark-color);
+            margin-bottom: 5px;
+            border-radius: 8px !important;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .list-group-item:hover {
+            background: var(--secondary-color);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .list-group-item span {
+            font-weight: 700;
+            color: var(--accent-color);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--secondary-color), #2980b9);
+            border: none;
+            border-radius: 50px;
+            padding: 12px 25px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            box-shadow: 0 5px 15px rgba(41, 128, 185, 0.4);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #2980b9, var(--secondary-color));
+            box-shadow: 0 8px 20px rgba(41, 128, 185, 0.6);
+            transform: translateY(-3px);
+        }
+
+        .btn-primary:active {
+            transform: translateY(1px);
+        }
+
+        .btn-primary::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.5);
+            opacity: 0;
+            border-radius: 100%;
+            transform: scale(1, 1) translate(-50%);
+            transform-origin: 50% 50%;
+        }
+
+        .btn-primary:focus:not(:active)::after {
+            animation: ripple 1s ease-out;
+        }
+
+        @keyframes ripple {
+            0% {
+                transform: scale(0, 0);
+                opacity: 0.5;
+            }
+            100% {
+                transform: scale(20, 20);
+                opacity: 0;
+            }
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 0.9em;
+            color: #7f8c8d;
+            padding: 20px;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .custom-icon {
+            background-color: white;
+            border-radius: 50%;
+            border: 2px solid var(--accent-color);
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .custom-icon i {
+            color: var(--accent-color);
+            font-size: 18px;
+        }
+
+        .prediction-display {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transform-style: preserve-3d;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .prediction-display::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                to bottom right,
+                rgba(255, 255, 255, 0.3) 0%,
+                rgba(255, 255, 255, 0) 60%
+            );
+            transform: rotate(30deg);
+            pointer-events: none;
+        }
+
+        .prediction-value {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--accent-color);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            margin: 10px 0;
+            display: inline-block;
+            position: relative;
+        }
+
+        .prediction-value::after {
+            content: 'cases';
+            position: absolute;
+            bottom: -15px;
+            right: 0;
+            font-size: 1rem;
+            font-weight: 400;
+            color: var(--dark-color);
+        }
+
+        .risk-indicator {
+            height: 10px;
+            border-radius: 5px;
+            background: linear-gradient(90deg, var(--success-color), var(--accent-color));
+            margin: 15px 0;
+            position: relative;
+        }
+
+        .risk-marker {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            background: white;
+            border: 3px solid var(--accent-color);
+            border-radius: 50%;
+            top: -2.5px;
+            transform: translateX(-50%);
+            transition: left 1s ease;
+        }
+
+        .risk-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: var(--dark-color);
+            margin-top: 5px;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 200px;
+            margin-top: 20px;
+        }
+
+        .map-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .map-layer-btn {
+            display: block;
+            width: 100%;
+            margin-bottom: 5px;
+            background: var(--light-color);
+            border: none;
+            color: var(--dark-color);
+            border-radius: 5px;
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            transition: all 0.2s ease;
+        }
+
+        .map-layer-btn:hover {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .map-layer-btn.active {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .weather-icon {
+            font-size: 1.5rem;
+            margin-right: 10px;
+            color: var(--secondary-color);
+        }
+
+        .factor-icon {
+            font-size: 1.2rem;
+            margin-right: 10px;
+            color: var(--accent-color);
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            color: var(--primary-color) !important;
+        }
+
+        .navbar {
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.95) !important;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-link {
+            font-weight: 600;
+            color: var(--dark-color) !important;
+            margin: 0 10px;
+            position: relative;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--accent-color);
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .nav-link.active::after {
+            width: 100%;
+        }
+
+        .floating-shapes {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .shape {
+            position: absolute;
+            opacity: 0.1;
+            border-radius: 50%;
+            filter: blur(30px);
+        }
+
+        .shape-1 {
+            width: 300px;
+            height: 300px;
+            background: var(--secondary-color);
+            top: -100px;
+            left: -100px;
+            animation: float 15s infinite ease-in-out;
+        }
+
+        .shape-2 {
+            width: 200px;
+            height: 200px;
+            background: var(--accent-color);
+            bottom: -50px;
+            right: -50px;
+            animation: float 12s infinite ease-in-out reverse;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translate(0, 0);
+            }
+            50% {
+                transform: translate(50px, 50px);
+            }
+        }
+
+        .tooltip-inner {
+            background-color: var(--dark-color);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        .bs-tooltip-auto[data-popper-placement^=top] .tooltip-arrow::before, 
+        .bs-tooltip-top .tooltip-arrow::before {
+            border-top-color: var(--dark-color);
+        }
+
+        .leaflet-popup-content {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .leaflet-popup-content-wrapper {
+            border-radius: 10px !important;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2) !important;
+        }
+
+        .leaflet-control-attribution {
+            background: rgba(255, 255, 255, 0.8) !important;
+            border-radius: 5px !important;
+            padding: 2px 5px !important;
+        }
+
+        .leaflet-tile {
+            filter: hue-rotate(10deg) saturate(1.2) contrast(0.95) brightness(1.05);
+        }
+
+        .leaflet-container {
+            background: #f0f4f8 !important;
+        }
+
+        .leaflet-marker-icon {
+            transition: transform 0.3s ease;
+        }
+
+        .leaflet-marker-icon:hover {
+            transform: scale(1.2);
+        }
+
+        .heatmap-legend {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            line-height: 1.2;
+        }
+
+        .heatmap-legend h4 {
+            margin: 0 0 5px 0;
+            font-size: 0.9rem;
+        }
+
+        .heatmap-legend i {
+            width: 18px;
+            height: 18px;
+            float: left;
+            margin-right: 8px;
+            opacity: 0.7;
+        }
+
+        .loading-spinner {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--secondary-color);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            border-radius: 15px;
+            display: none;
+        }
+
+        .timeline-container {
+            margin-top: 20px;
+        }
+
+        .timeline {
+            position: relative;
+            height: 4px;
+            background: #ddd;
+            border-radius: 2px;
+            margin: 20px 0;
+        }
+
+        .timeline-progress {
+            position: absolute;
+            height: 100%;
+            background: linear-gradient(90deg, var(--secondary-color), var(--accent-color));
+            border-radius: 2px;
+            width: 0;
+            transition: width 0.5s ease;
+        }
+
+        .timeline-steps {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+        }
+
+        .timeline-step {
+            width: 20px;
+            height: 20px;
+            background: #ddd;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.7rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .timeline-step.active {
+            background: var(--secondary-color);
+            transform: scale(1.2);
+        }
+
+        .timeline-step.completed {
+            background: var(--success-color);
+        }
+
+        .timeline-label {
+            position: absolute;
+            top: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.7rem;
+            white-space: nowrap;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--accent-color);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            right: -350px;
+            width: 350px;
+            height: 100%;
+            background: white;
+            box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+            z-index: 1050;
+            transition: right 0.3s ease;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .sidebar.open {
+            right: 0;
+        }
+
+        .sidebar-toggle {
+            position: fixed;
+            right: 20px;
+            top: 20px;
+            z-index: 1051;
+            background: var(--secondary-color);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+        }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .sidebar-title {
+            font-weight: 700;
+            color: var(--primary-color);
+            margin: 0;
+        }
+
+        .close-sidebar {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #999;
+            cursor: pointer;
+        }
+
+        .sidebar-content {
+            margin-bottom: 20px;
+        }
+
+        .sidebar-section {
+            margin-bottom: 20px;
+        }
+
+        .sidebar-section-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .sidebar-section-title i {
+            margin-right: 10px;
+            color: var(--secondary-color);
+        }
+
+        .sidebar-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar-list-item {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+        }
+
+        .sidebar-list-item i {
+            margin-right: 10px;
+            color: var(--secondary-color);
+            width: 20px;
+            text-align: center;
+        }
+
+        .sidebar-list-item:hover {
+            color: var(--secondary-color);
+            cursor: pointer;
+        }
+
+        .sidebar-footer {
+            margin-top: 20px;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+            font-size: 0.8rem;
+            color: #999;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+                margin-top: 15px;
+            }
+            
+            .card {
+                margin-bottom: 15px;
+            }
+            
+            #map {
+                height: 400px;
+            }
+            
+            .sidebar {
+                width: 280px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-bug me-2"></i>DenguePredict
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#"><i class="fas fa-home me-1"></i> Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#"><i class="fas fa-map-marked-alt me-1"></i> Map</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#"><i class="fas fa-chart-line me-1"></i> Analytics</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#"><i class="fas fa-info-circle me-1"></i> About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#"><i class="fas fa-envelope me-1"></i> Contact</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="floating-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+    </div>
+
+    <div class="container animate__animated animate__fadeIn">
+        <h1 class="text-center">Dengue Prediction System</h1>
+      <p class="text-center mb-4">Dengue Outbreak Prediction on the basis of Environmental and Demographic factors</p>
+        
+        <div class="timeline-container">
+            <div class="timeline">
+                <div class="timeline-progress" id="timelineProgress"></div>
+            </div>
+            <div class="timeline-steps">
+                <div class="timeline-step completed" data-step="1" data-bs-toggle="tooltip" title="Location Selected">
+                    <i class="fas fa-check"></i>
+                    <span class="timeline-label">Location</span>
+                </div>
+                <div class="timeline-step" data-step="2" data-bs-toggle="tooltip" title="Data Analysis">
+                    <span class="timeline-label">Analysis</span>
+                </div>
+                <div class="timeline-step" data-step="3" data-bs-toggle="tooltip" title="Prediction Generated">
+                    <span class="timeline-label">Prediction</span>
+                </div>
+                <div class="timeline-step" data-step="4" data-bs-toggle="tooltip" title="Results Visualized">
+                    <span class="timeline-label">Visualization</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-4">
+                <div class="card p-4 h-100">
+                    <h4 class="text-center mb-4"><i class="fas fa-tree me-2"></i>Environmental Factors</h4>
+                    <ul id="envFactors" class="list-group">
+                        <li class="list-group-item">
+                            <span><i class="fas fa-temperature-high weather-icon"></i>Temperature</span>
+                            <span class="badge bg-primary rounded-pill">Loading...</span>
+                        </li>
+                        <li class="list-group-item">
+                            <span><i class="fas fa-tint weather-icon"></i>Humidity</span>
+                            <span class="badge bg-primary rounded-pill">Loading...</span>
+                        </li>
+                        <li class="list-group-item">
+                            <span><i class="fas fa-cloud-rain weather-icon"></i>Precipitation</span>
+                            <span class="badge bg-primary rounded-pill">Loading...</span>
+                        </li>
+                        <li class="list-group-item">
+                            <span><i class="fas fa-wind weather-icon"></i>Wind Speed</span>
+                            <span class="badge bg-primary rounded-pill">Loading...</span>
+                        </li>
+                        <li class="list-group-item">
+                            <span><i class="fas fa-sun weather-icon"></i>UV Index</span>
+                            <span class="badge bg-primary rounded-pill">Loading...</span>
+                        </li>
+                    </ul>
+                    <div class="chart-container mt-3">
+                        <canvas id="envChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card p-4 h-100">
+                    <h4 class="text-center mb-4"><i class="fas fa-search-location me-2"></i>Search Location</h4>
+                    <form id="predictForm">
+                        <div class="input-group mb-3">
+                            <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
+                            <input type="text" id="location" class="form-control" placeholder="Enter city or coordinates" required>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-bolt me-1"></i> Predict
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <div class="prediction-display">
+                        <h5>Predicted Dengue Cases</h5>
+                        <div class="prediction-value" id="predictedCases">--</div>
+                        <div class="risk-indicator">
+                            <div class="risk-marker" id="riskMarker" style="left: 0%;"></div>
+                        </div>
+                        <div class="risk-labels">
+                            <span>Low</span>
+                            <span>Medium</span>
+                            <span>High</span>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info mt-3">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <small>Predictions are based on current environmental conditions and historical data patterns.</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card p-4 h-100">
+                    <h4 class="text-center mb-4"><i class="fas fa-users me-2"></i>Demographic Factors</h4>
+                    <ul id="demoFactors" class="list-group">
+                        <li class="list-group-item">
+                            <span><i class="fas fa-user factor-icon"></i>Population Density</span>
+                            <span class="badge bg-primary rounded-pill">Loading...</span>
+                        </li>
+                        <li class="list-group-item">
+                            <span><i class="fas fa-home factor-icon"></i>Housing Type</span>
+                            <span class="badge bg-primary rounded-pill">Loading...</span>
+                        </li>
+                        <li class="list-group-item">
+                            <span><i class="fas fa-hospital factor-icon"></i>Healthcare Access</span>
+                            <span class="badge bg-primary rounded-pill">Loading...</span>
+                        </li>
+                        <li class="list-group-item">
+                            <span><i class="fas fa-history factor-icon"></i>Historical Cases</span>
+                            <span class="badge bg-primary rounded-pill">Loading...</span>
+                        </li>
+                        <li class="list-group-item">
+                            <span><i class="fas fa-vector-square factor-icon"></i>Water Storage</span>
+                            <span class="badge bg-primary rounded-pill">Loading...</span>
+                        </li>
+                    </ul>
+                    <div class="chart-container mt-3">
+                        <canvas id="demoChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <div class="card p-3">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4 class="mb-0"><i class="fas fa-map me-2"></i>Dengue Risk Map</h4>
+                        <div>
+                            <button class="btn btn-sm btn-outline-primary me-2" id="heatmapBtn">
+                                <i class="fas fa-fire"></i> Heatmap
+                            </button>
+                            <button class="btn btn-sm btn-outline-secondary" id="clusterBtn">
+                                <i class="fas fa-layer-group"></i> Clusters
+                            </button>
+                        </div>
+                    </div>
+                    <div id="map-container" style="position: relative;">
+                        <div class="loading-overlay" id="mapLoadingOverlay">
+                            <div class="loading-spinner">
+                                <div class="spinner"></div>
+                            </div>
+                        </div>
+                        <div id="map"></div>
+                        <div class="map-controls">
+                            <button class="map-layer-btn active" data-layer="cases">
+                                <i class="fas fa-bug me-1"></i> Cases
+                            </button>
+                            <button class="map-layer-btn" data-layer="hospitals">
+                                <i class="fas fa-hospital me-1"></i> Hospitals
+                            </button>
+                            <button class="map-layer-btn" data-layer="prevention">
+                                <i class="fas fa-shield-alt me-1"></i> Prevention
+                            </button>
+                        </div>
+                    </div>
+                    <div class="mt-3 d-flex justify-content-between">
+                        <div>
+                            <span class="badge bg-danger me-2"><i class="fas fa-bug"></i> High Risk</span>
+                            <span class="badge bg-warning me-2"><i class="fas fa-bug"></i> Medium Risk</span>
+                            <span class="badge bg-success"><i class="fas fa-bug"></i> Low Risk</span>
+                        </div>
+                        <button class="btn btn-sm btn-outline-primary" id="downloadReportBtn">
+                            <i class="fas fa-download me-1"></i> Download Report
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>&copy; 2023 Dengue Prediction System. All rights reserved. | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
+            <div class="mt-2">
+                <a href="#" class="text-secondary me-2"><i class="fab fa-twitter"></i></a>
+                <a href="#" class="text-secondary me-2"><i class="fab fa-facebook"></i></a>
+                <a href="#" class="text-secondary me-2"><i class="fab fa-linkedin"></i></a>
+                <a href="#" class="text-secondary"><i class="fab fa-github"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <button class="sidebar-toggle" id="sidebarToggle">
+        <i class="fas fa-bell"></i>
+        <span class="notification-badge">3</span>
+    </button>
+
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h5 class="sidebar-title"><i class="fas fa-bell me-2"></i>Notifications</h5>
+            <button class="close-sidebar" id="closeSidebar">&times;</button>
+        </div>
+        <div class="sidebar-content">
+            <div class="sidebar-section">
+                <h6 class="sidebar-section-title"><i class="fas fa-exclamation-triangle me-2"></i>Alerts</h6>
+                <ul class="sidebar-list">
+                    <li class="sidebar-list-item">
+                        <i class="fas fa-bug"></i> High dengue risk predicted in your area
+                    </li>
+                    <li class="sidebar-list-item">
+                        <i class="fas fa-cloud-rain"></i> Heavy rainfall expected - mosquito breeding likely
+                    </li>
+                </ul>
+            </div>
+            <div class="sidebar-section">
+                <h6 class="sidebar-section-title"><i class="fas fa-lightbulb me-2"></i>Prevention Tips</h6>
+                <ul class="sidebar-list">
+                    <li class="sidebar-list-item">
+                        <i class="fas fa-trash"></i> Remove standing water in your area
+                    </li>
+                    <li class="sidebar-list-item">
+                        <i class="fas fa-spray-can"></i> Use mosquito repellent
+                    </li>
+                    <li class="sidebar-list-item">
+                        <i class="fas fa-tshirt"></i> Wear protective clothing
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="sidebar-footer">
+            Last updated: <span id="lastUpdated">Just now</span>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Initialize map with better base layers
+        var map = L.map('map', {
+            center: [20.5937, 78.9629],
+            zoom: 5,
+            zoomControl: false,
+            preferCanvas: true
+        });
+
+        // Add different tile layers
+        var osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        var satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+        });
+
+        var darkLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+        });
+
+        // Add base layer control
+        var baseLayers = {
+            "Street Map": osmLayer,
+            "Satellite": satelliteLayer,
+            "Dark Mode": darkLayer
+        };
+
+        L.control.layers(baseLayers, null, {position: 'bottomleft'}).addTo(map);
+
+        // Add zoom control with better position
+        L.control.zoom({position: 'topright'}).addTo(map);
+
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+        // Initialize charts
+        var envChart = new Chart(
+            document.getElementById('envChart'),
+            {
+                type: 'radar',
+                data: {
+                    labels: ['Temperature', 'Humidity', 'Precipitation', 'Wind', 'UV Index'],
+                    datasets: [{
+                        label: 'Environmental Factors',
+                        data: [65, 59, 80, 81, 56],
+                        fill: true,
+                        backgroundColor: 'rgba(52, 152, 219, 0.2)',
+                        borderColor: 'rgba(52, 152, 219, 1)',
+                        pointBackgroundColor: 'rgba(52, 152, 219, 1)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(52, 152, 219, 1)'
+                    }]
+                },
+                options: {
+                    scales: {
+                        r: {
+                            angleLines: {
+                                display: true
+                            },
+                            suggestedMin: 0,
+                            suggestedMax: 100
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    maintainAspectRatio: false
+                }
+            }
+        );
+
+        var demoChart = new Chart(
+            document.getElementById('demoChart'),
+            {
+                type: 'bar',
+                data: {
+                    labels: ['Population', 'Housing', 'Healthcare', 'History', 'Water'],
+                    datasets: [{
+                        label: 'Demographic Factors',
+                        data: [65, 59, 80, 81, 56],
+                        backgroundColor: [
+                            'rgba(231, 76, 60, 0.7)',
+                            'rgba(241, 196, 15, 0.7)',
+                            'rgba(46, 204, 113, 0.7)',
+                            'rgba(52, 152, 219, 0.7)',
+                            'rgba(155, 89, 182, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(231, 76, 60, 1)',
+                            'rgba(241, 196, 15, 1)',
+                            'rgba(46, 204, 113, 1)',
+                            'rgba(52, 152, 219, 1)',
+                            'rgba(155, 89, 182, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    maintainAspectRatio: false
+                }
+            }
+        );
+
+        // Form submission handler
+        document.getElementById('predictForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            var location = document.getElementById('location').value;
+            
+            if (!location) {
+                alert('Please enter a location');
+                return;
+            }
+            
+            // Show loading state
+            document.getElementById('mapLoadingOverlay').style.display = 'block';
+            document.querySelector('.loading-spinner').style.display = 'block';
+            
+            // Update timeline
+            updateTimeline(1);
+            
+            // Simulate API call with timeout
+            setTimeout(function() {
+                fetch('/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: 'location=' + encodeURIComponent(location)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert(data.error);
+                        return;
+                    }
+                    
+                    // Update timeline
+                    updateTimeline(4);
+                    
+                    document.getElementById('predictedCases').textContent = data.predicted_cases || '--';
+                    
+                    // Update risk marker position (0-100%)
+                    var riskPercentage = Math.min(100, Math.max(0, data.predicted_cases / 100 * 100));
+                    document.getElementById('riskMarker').style.left = riskPercentage + '%';
+                    
+                    updateFactors(data.factors || {});
+                    plotLocation(location, data.predicted_cases);
+                    
+                    // Update charts with random data for demo
+                    envChart.data.datasets[0].data = [
+                        Math.floor(Math.random() * 100),
+                        Math.floor(Math.random() * 100),
+                        Math.floor(Math.random() * 100),
+                        Math.floor(Math.random() * 100),
+                        Math.floor(Math.random() * 100)
+                    ];
+                    envChart.update();
+                    
+                    demoChart.data.datasets[0].data = [
+                        Math.floor(Math.random() * 100),
+                        Math.floor(Math.random() * 100),
+                        Math.floor(Math.random() * 100),
+                        Math.floor(Math.random() * 100),
+                        Math.floor(Math.random() * 100)
+                    ];
+                    demoChart.update();
+                    
+                    // Hide loading
+                    document.getElementById('mapLoadingOverlay').style.display = 'none';
+                    document.querySelector('.loading-spinner').style.display = 'none';
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('mapLoadingOverlay').style.display = 'none';
+                    document.querySelector('.loading-spinner').style.display = 'none';
+                });
+            }, 1500);
+        });
+
+        function updateTimeline(step) {
+            // Reset all steps
+            document.querySelectorAll('.timeline-step').forEach(el => {
+                el.classList.remove('active', 'completed');
+            });
+            
+            // Update progress bar
+            var progress = (step / 4) * 100;
+            document.getElementById('timelineProgress').style.width = progress + '%';
+            
+            // Mark completed steps
+            for (var i = 1; i <= step; i++) {
+                var stepEl = document.querySelector(`.timeline-step[data-step="${i}"]`);
+                if (stepEl) {
+                    if (i < step) {
+                        stepEl.classList.add('completed');
+                        stepEl.innerHTML = '<i class="fas fa-check"></i>' + (stepEl.querySelector('.timeline-label') ? '<span class="timeline-label">' + stepEl.querySelector('.timeline-label').textContent + '</span>' : '');
+                    } else {
+                        stepEl.classList.add('active');
+                    }
+                }
+            }
+        }
+
+        function updateFactors(factors) {
+            var envList = document.getElementById('envFactors');
+            var demoList = document.getElementById('demoFactors');
+            envList.innerHTML = '';
+            demoList.innerHTML = '';
+            
+            // Environmental factors
+            if (factors.temperature !== undefined) {
+                addFactorItem(envList, 'Temperature', factors.temperature + '°C', 'temperature-high');
+            }
+            if (factors.humidity !== undefined) {
+                addFactorItem(envList, 'Humidity', factors.humidity + '%', 'tint');
+            }
+            if (factors.precipitation !== undefined) {
+                addFactorItem(envList, 'Precipitation', factors.precipitation + 'mm', 'cloud-rain');
+            }
+            if (factors.wind_speed !== undefined) {
+                addFactorItem(envList, 'Wind Speed', factors.wind_speed + 'km/h', 'wind');
+            }
+            if (factors.uv_index !== undefined) {
+                addFactorItem(envList, 'UV Index', factors.uv_index, 'sun');
+            }
+            
+            // Demographic factors
+            if (factors.population_density !== undefined) {
+                addFactorItem(demoList, 'Population Density', factors.population_density + '/km²', 'user');
+            }
+            if (factors.housing_type !== undefined) {
+                addFactorItem(demoList, 'Housing Type', factors.housing_type, 'home');
+            }
+            if (factors.healthcare_access !== undefined) {
+                addFactorItem(demoList, 'Healthcare Access', factors.healthcare_access, 'hospital');
+            }
+            if (factors.historical_cases !== undefined) {
+                addFactorItem(demoList, 'Historical Cases', factors.historical_cases, 'history');
+            }
+            if (factors.water_storage !== undefined) {
+                addFactorItem(demoList, 'Water Storage', factors.water_storage, 'vector-square');
+            }
+        }
+
+        function addFactorItem(list, name, value, icon) {
+            let listItem = document.createElement('li');
+            listItem.className = 'list-group-item';
+            listItem.innerHTML = `
+                <span><i class="fas fa-${icon} weather-icon"></i>${name}</span>
+                <span class="badge bg-primary rounded-pill">${value}</span>
+            `;
+            list.appendChild(listItem);
+        }
+
+        function plotLocation(location, cases) {
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${location}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.length > 0) {
+                    let lat = parseFloat(data[0].lat);
+                    let lon = parseFloat(data[0].lon);
+                    
+                    // Clear existing markers
+                    map.eachLayer(layer => {
+                        if (layer instanceof L.Marker || layer instanceof L.CircleMarker) {
+                            map.removeLayer(layer);
+                        }
+                    });
+                    
+                    map.setView([lat, lon], 12);
+                    
+                    // Add main location marker with custom icon
+                    var mainIcon = L.divIcon({
+                        className: 'custom-icon',
+                        html: '<i class="fas fa-map-pin"></i>',
+                        iconSize: [30, 30]
+                    });
+                    
+                    L.marker([lat, lon], {icon: mainIcon}).addTo(map)
+                        .bindPopup(`<b>${location}</b><br>Predicted cases: ${cases || 'N/A'}`)
+                        .openPopup();
+                    
+                    // Add dengue cases and hospitals
+                    showDengueMarkers(lat, lon, cases);
+                    
+                    // Add heatmap layer if selected
+                    if (document.getElementById('heatmapBtn').classList.contains('active')) {
+                        addHeatmapLayer(lat, lon);
+                    }
+                }
+            });
+        }
+
+        function showDengueMarkers(lat, lon, cases) {
+            // Generate random dengue cases around the location
+            var dengueCases = [];
+            for (var i = 0; i < 15; i++) {
+                dengueCases.push([
+                    lat + (Math.random() * 0.2 - 0.1),
+                    lon + (Math.random() * 0.2 - 0.1)
+                ]);
+            }
+            
+            // Add dengue cases with color based on intensity
+            dengueCases.forEach(pos => {
+                var intensity = Math.random();
+                var color = intensity > 0.7 ? '#e74c3c' : intensity > 0.4 ? '#f39c12' : '#2ecc71';
+                var radius = intensity > 0.7 ? 10 : intensity > 0.4 ? 7 : 5;
+                
+                L.circleMarker(pos, {
+                    color: color,
+                    fillColor: color,
+                    fillOpacity: 0.7,
+                    radius: radius
+                }).addTo(map)
+                .bindPopup('Dengue Case<br>Risk: ' + (intensity > 0.7 ? 'High' : intensity > 0.4 ? 'Medium' : 'Low'));
+            });
+            
+            // Add hospitals
+            var hospitals = [
+                [lat + 0.15, lon + 0.15],
+                [lat - 0.15, lon - 0.15],
+                [lat + 0.1, lon - 0.1]
+            ];
+            
+            hospitals.forEach(pos => {
+                L.marker(pos, {
+                    icon: L.divIcon({
+                        className: 'custom-icon',
+                        html: '<i class="fas fa-hospital"></i>',
+                        iconSize: [30, 30]
+                    })
+                }).addTo(map).bindPopup('Hospital<br>Capacity: ' + (50 + Math.floor(Math.random() * 50)));
+            });
+            
+            // Add prevention centers
+            var preventionCenters = [
+                [lat + 0.05, lon + 0.2],
+                [lat - 0.05, lon - 0.2]
+            ];
+            
+            preventionCenters.forEach(pos => {
+                L.marker(pos, {
+                    icon: L.divIcon({
+                        className: 'custom-icon',
+                        html: '<i class="fas fa-shield-alt"></i>',
+                        iconSize: [30, 30]
+                    })
+                }).addTo(map).bindPopup('Prevention Center<br>Spraying scheduled');
+            });
+        }
+
+        function addHeatmapLayer(lat, lon) {
+            // In a real app, you would use a proper heatmap library like Leaflet.heat
+            // This is just a simulation for demo purposes
+            var heatPoints = [];
+            
+            for (var i = 0; i < 50; i++) {
+                heatPoints.push([
+                    lat + (Math.random() * 0.3 - 0.15),
+                    lon + (Math.random() * 0.3 - 0.15),
+                    Math.random() * 1
+                ]);
+            }
+            
+            // Clear existing heatmap if any
+            if (window.heatLayer) {
+                map.removeLayer(window.heatLayer);
+            }
+            
+            // Simulate heatmap with circle markers
+            window.heatLayer = L.layerGroup();
+            
+            heatPoints.forEach(point => {
+                var intensity = point[2];
+                var color = intensity > 0.7 ? '#e74c3c' : intensity > 0.4 ? '#f39c12' : '#2ecc71';
+                var radius = intensity * 30;
+                
+                L.circle([point[0], point[1]], {
+                    radius: radius,
+                    fillColor: color,
+                    color: color,
+                    weight: 1,
+                    opacity: 0.5,
+                    fillOpacity: 0.3
+                }).addTo(window.heatLayer);
+            });
+            
+            window.heatLayer.addTo(map);
+            
+            // Add legend
+            if (window.heatLegend) {
+                map.removeControl(window.heatLegend);
+            }
+            
+            window.heatLegend = L.control({position: 'bottomright'});
+            
+            window.heatLegend.onAdd = function(map) {
+                var div = L.DomUtil.create('div', 'heatmap-legend');
+                div.innerHTML = `
+                    <h4>Risk Heatmap</h4>
+                    <div><i style="background: #2ecc71"></i> Low</div>
+                    <div><i style="background: #f39c12"></i> Medium</div>
+                    <div><i style="background: #e74c3c"></i> High</div>
+                `;
+                return div;
+            };
+            
+            window.heatLegend.addTo(map);
+        }
+
+        // Toggle heatmap
+        document.getElementById('heatmapBtn').addEventListener('click', function() {
+            this.classList.toggle('active');
+            document.getElementById('clusterBtn').classList.remove('active');
+            
+            if (this.classList.contains('active')) {
+                var center = map.getCenter();
+                addHeatmapLayer(center.lat, center.lng);
+            } else if (window.heatLayer) {
+                map.removeLayer(window.heatLayer);
+                if (window.heatLegend) {
+                    map.removeControl(window.heatLegend);
+                }
+            }
+        });
+
+        // Toggle cluster (simulated)
+        document.getElementById('clusterBtn').addEventListener('click', function() {
+            this.classList.toggle('active');
+            document.getElementById('heatmapBtn').classList.remove('active');
+            
+            if (window.heatLayer) {
+                map.removeLayer(window.heatLayer);
+                if (window.heatLegend) {
+                    map.removeControl(window.heatLegend);
+                }
+            }
+            
+            // In a real app, you would implement actual clustering here
+            alert('Cluster view would be implemented here with a proper clustering library');
+        });
+
+        // Map layer controls
+        document.querySelectorAll('.map-layer-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.map-layer-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                // In a real app, you would toggle map layers here
+            });
+        });
+
+        // Sidebar toggle
+        document.getElementById('sidebarToggle').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('open');
+        });
+
+        document.getElementById('closeSidebar').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.remove('open');
+        });
+
+        // Download report button
+        document.getElementById('downloadReportBtn').addEventListener('click', function() {
+            // In a real app, this would generate a PDF report
+            alert('This would generate and download a PDF report with all the prediction data');
+        });
+
+        // Initialize with some random data for demo
+        updateFactors({
+            temperature: (25 + Math.random() * 10).toFixed(1),
+            humidity: (40 + Math.random() * 40).toFixed(0),
+            precipitation: (Math.random() * 20).toFixed(1),
+            wind_speed: (5 + Math.random() * 15).toFixed(1),
+            uv_index: (3 + Math.random() * 7).toFixed(1),
+            population_density: (1000 + Math.random() * 9000).toFixed(0),
+            housing_type: ['Urban', 'Suburban', 'Rural'][Math.floor(Math.random() * 3)],
+            healthcare_access: ['High', 'Medium', 'Low'][Math.floor(Math.random() * 3)],
+            historical_cases: (10 + Math.random() * 90).toFixed(0),
+            water_storage: ['High', 'Medium', 'Low'][Math.floor(Math.random() * 3)]
+        });
+
+        // Update last updated time
+        function updateLastUpdated() {
+            var now = new Date();
+            document.getElementById('lastUpdated').textContent = now.toLocaleTimeString();
+        }
+        
+        updateLastUpdated();
+        setInterval(updateLastUpdated, 60000);
+    </script>
+</body>
+</html>
